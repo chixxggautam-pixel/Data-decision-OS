@@ -1,3 +1,5 @@
+import tempfile
+from fastapi.responses import FileResponse
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
@@ -12,7 +14,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.post("/photo-excel")
+async def photo_excel(
+    file: UploadFile = File(...)
+):
+    temp = tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".csv"
+    )
 
+    with open(
+        temp.name,
+        "w"
+    ) as f:
+        f.write(
+            "Column1,Column2\nAI Extracted,Demo"
+        )
+
+    return FileResponse(
+        temp.name,
+        filename="photo_data.csv"
+    )
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
     content = await file.read()
